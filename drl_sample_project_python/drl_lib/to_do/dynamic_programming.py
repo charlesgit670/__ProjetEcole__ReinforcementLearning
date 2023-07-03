@@ -1,5 +1,7 @@
 import numpy as np
 import random
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from ..do_not_touch.mdp_env_wrapper import Env1
 from ..do_not_touch.result_structures import ValueFunction, Policy, PolicyAndValueFunction
@@ -128,6 +130,60 @@ def value_iteration(S, A, R, p):
 
     return ans
 
+def plot_grid_world(pi, V):
+    matrix = [[1 if V.get((x, y)) == 0 else V.get((x, y)) for y in range(5)] for x in range(5)]
+    directions = {key: max(value, key=value.get) for key, value in pi.items()}
+
+    fig, ax = plt.subplots()
+    sns.heatmap(matrix, cmap='coolwarm', cbar=True, ax=ax)
+
+    ax.set_xlim(0, 5)
+    ax.set_ylim(5, 0)
+
+    # Parcours de la grille et des directions pour tracer les flèches
+    for (x, y), direction in directions.items():
+        dx, dy = 0, 0
+        if direction == 0:
+            dx = -0.4
+        elif direction == 1:
+            dx = 0.4
+        elif direction == 2:
+            dy = 0.4
+        elif direction == 3:
+            dy = -0.4
+        ax.arrow(y + 0.5, x + 0.5, dx, dy, head_width=0.1, head_length=0.1, fc='black')
+    plt.show()
+
+def plot_line_world(pi, V):
+    matrix = [[1 if V.get(y) == 0 else V.get(y) for y in range(len(V))] for x in range(1)]
+    directions = {key: max(value, key=value.get) for key, value in pi.items()}
+
+    fig, ax = plt.subplots(figsize=(8, 1))
+    sns.heatmap(matrix, cmap='coolwarm', cbar=True, ax=ax)
+
+    ax.set_xlim(0, len(V))
+    ax.set_ylim(0, 1)
+
+    # Parcours de la grille et des directions pour tracer les flèches
+    for x, direction in directions.items():
+        dx, dy = 0, 0
+        if direction == 0:
+            dx = -0.4
+        elif direction == 1:
+            dx = 0.4
+        ax.arrow(x+0.5, 0.5, dx, dy, head_width=0.1, head_length=0.1, fc='black')
+    plt.show()
+
+def plot_secret_env(V):
+    matrix = [[V.get(y) for y in range(len(V))] for x in range(1)]
+
+    fig, ax = plt.subplots(figsize=(8, 1))
+    sns.heatmap(matrix, cmap='coolwarm', cbar=True, ax=ax)
+
+    ax.set_xlim(0, len(V))
+    ax.set_ylim(0, 1)
+    plt.show()
+
 def policy_evaluation_on_line_world() -> ValueFunction:
     """
     Creates a Line World of 7 cells (leftmost and rightmost are terminal, with -1 and 1 reward respectively)
@@ -155,7 +211,9 @@ def value_iteration_on_line_world() -> PolicyAndValueFunction:
     Returns the Policy (Pi(s,a)) and its Value Function (V(s))
     """
     S, A, R = env_line_world()
-    return value_iteration(S, A, R, p_line_world)
+    pi, V = value_iteration(S, A, R, p_line_world)
+    plot_line_world(pi, V)
+    return pi, V
 
 
 
@@ -187,7 +245,9 @@ def value_iteration_on_grid_world() -> PolicyAndValueFunction:
     Returns the Policy (Pi(s,a)) and its Value Function (V(s))
     """
     S, A, R = env_grid_world()
-    return value_iteration(S, A, R, p_grid_world)
+    pi, V = value_iteration(S, A, R, p_grid_world)
+    plot_grid_world(pi, V)
+    return pi, V
 
 
 def policy_evaluation_on_secret_env1() -> ValueFunction:
@@ -236,7 +296,11 @@ def value_iteration_on_secret_env1() -> PolicyAndValueFunction:
     A = env.actions()
     R = env.rewards()
 
-    return value_iteration(S, A, R, env.transition_probability)
+    pi, V = value_iteration(S, A, R, env.transition_probability)
+
+    plot_secret_env(V)
+
+    return pi, V
 
 
 def demo():
