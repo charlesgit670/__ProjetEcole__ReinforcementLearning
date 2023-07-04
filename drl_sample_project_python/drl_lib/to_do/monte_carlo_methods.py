@@ -1,10 +1,11 @@
 import numpy as np
 import json
 import os
+import copy
 
 from ..do_not_touch.contracts import SingleAgentEnv
 from ..do_not_touch.result_structures import PolicyAndActionValueFunction, Policy, ActionValueFunction
-from ..do_not_touch.single_agent_env_wrapper import Env2
+from ..do_not_touch.single_agent_env_wrapper import Env2, Env3
 from ..custom_monte_carlo_env.TicTacToeEnv import TicTacToeEnv
 
 path_save_logs = "logs/"
@@ -77,6 +78,7 @@ def monte_carlo_es(env: SingleAgentEnv,
         lenght_episodes.append(lenght_episode)
         reward_episodes.append(G)
 
+    print(len(pi))
     #save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -146,6 +148,7 @@ def on_policy_first_visit_monte_carlo_control(env: SingleAgentEnv,
         lenght_episodes.append(lenght_episode)
         reward_episodes.append(G)
 
+    print(len(pi))
     # save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -158,8 +161,10 @@ def on_policy_first_visit_monte_carlo_control(env: SingleAgentEnv,
     return ans
 
 def off_policy_monte_carlo_control(env: SingleAgentEnv,
+                                   env_bis: SingleAgentEnv,
                                    gamma: float = 0.99999,
                                    max_episodes_count: int = 10000):
+
     # used for logs
     lenght_episodes = []
     reward_episodes = []
@@ -168,7 +173,35 @@ def off_policy_monte_carlo_control(env: SingleAgentEnv,
     Q: ActionValueFunction = {}
     C = {}
     for ep_id in range(max_episodes_count):
+        # Launch episode with pi to calcul metrics mean reward and mean lenght
         lenght_episode = 0
+        G_reward = 0
+        env_bis.reset()
+        while not env_bis.is_game_over():
+            s = env_bis.state_id()
+            aa = env_bis.available_actions_ids()
+            if s not in pi.keys():
+                Q[s] = {a: np.random.uniform(-1.0, 1.0) for a in aa}
+                C[s] = {a: 0 for a in aa}
+                best_a = argmax(Q[s])
+                pi[s] = {a: 0 for a in aa}
+                pi[s][best_a] = 1
+
+            pi_s = [pi[s][a] for a in aa]
+            assert (abs(np.sum(pi_s) - 1) < 1e-9)
+            a = np.random.choice(aa, p=pi_s)
+
+            old_score = env_bis.score()
+            env_bis.act_with_action_id(a)
+            new_score = env_bis.score()
+            r = new_score - old_score
+
+            G_reward += gamma**lenght_episode * r
+            lenght_episode += 1
+
+        lenght_episodes.append(lenght_episode)
+        reward_episodes.append(G_reward)
+        # ------------------------------------------
 
         b = {}
         S = []
@@ -201,7 +234,6 @@ def off_policy_monte_carlo_control(env: SingleAgentEnv,
             S.append(s)
             A.append(a)
             R.append(r)
-            lenght_episode += 1
 
         G = 0
         W = 1
@@ -219,9 +251,8 @@ def off_policy_monte_carlo_control(env: SingleAgentEnv,
             if a_t != best_a:
                 break
             W = W/b[s_t][a_t]
-        lenght_episodes.append(lenght_episode)
-        reward_episodes.append(G)
 
+    print(len(pi))
     # save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -272,8 +303,9 @@ def off_policy_monte_carlo_control_on_tic_tac_toe_solo(play_first) -> PolicyAndA
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
     # TODO
-    env = TicTacToeEnv(play_first)
-    return off_policy_monte_carlo_control(env)
+    env1 = TicTacToeEnv(play_first)
+    env2 = TicTacToeEnv(play_first)
+    return off_policy_monte_carlo_control(env1, env2)
 
 
 def monte_carlo_es_on_secret_env2() -> PolicyAndActionValueFunction:
@@ -294,6 +326,8 @@ def on_policy_first_visit_monte_carlo_control_on_secret_env2() -> PolicyAndActio
     Returns the Optimal epsilon-greedy Policy (Pi(s,a)) and its Action-Value function (Q(s,a))
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
+    # epsilon petit (0.001) => peu d'état à explorer donc on profite pour maximiser la reward
+    # converge vers 0.7 environ
     env = Env2()
     # TODO
     return on_policy_first_visit_monte_carlo_control(env)
@@ -306,9 +340,10 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
     Returns the Optimal Policy (Pi(s,a)) and its Action-Value function (Q(s,a))
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
-    env = Env2()
+    env1 = Env2()
+    env2 = Env2()
     # TODO
-    return off_policy_monte_carlo_control(env)
+    return off_policy_monte_carlo_control(env1, env2)
 
 
 def demo():

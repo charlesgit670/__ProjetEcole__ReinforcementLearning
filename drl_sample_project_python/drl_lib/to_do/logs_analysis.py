@@ -14,9 +14,11 @@ def plot_reward_lengh(path_logs, file_name, mean_param=100):
 
         x_axis = [i for i in range(0, int(len(lenght_episodes)/mean_param))]
         fig, ax = plt.subplots()
+        ax.set_title(f"mean over {mean_param} points lenghts")
         ax.plot(x_axis, mean_lenghts)
 
         fig2, ax2 = plt.subplots()
+        ax2.set_title(f"mean over {mean_param} points for cumulative rewards")
         ax2.plot(x_axis, mean_rewards)
 
         plt.show()

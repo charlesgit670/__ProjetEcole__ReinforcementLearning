@@ -14,7 +14,7 @@ def sarsa(env: SingleAgentEnv,
                gamma: float = 0.9999,
                alpha: float = 0.1,
                epsilon: float = 0.2,
-               max_episodes_count: int = 100000):
+               max_episodes_count: int = 10000):
     assert (epsilon > 0)
     assert (alpha > 0)
 
@@ -42,6 +42,7 @@ def sarsa(env: SingleAgentEnv,
             a = np.random.choice(aa)
         else:
             a = argmax(Q[s])
+
         while not env.is_game_over():
             old_score = env.score()
             env.act_with_action_id(a)
@@ -74,6 +75,7 @@ def sarsa(env: SingleAgentEnv,
         lenght_episodes.append(lenght_episode)
         reward_episodes.append(G)
 
+    print(len(pi))
     # save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -87,7 +89,7 @@ def sarsa(env: SingleAgentEnv,
 
 
 def q_learning(env: SingleAgentEnv,
-               gamma: float = 0.9999,
+               gamma: float = 0.99999,
                alpha: float = 0.1,
                epsilon: float = 0.2,
                max_episodes_count: int = 50000):
@@ -145,6 +147,7 @@ def q_learning(env: SingleAgentEnv,
         lenght_episodes.append(lenght_episode)
         reward_episodes.append(G)
 
+    print(len(pi))
     # save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -157,7 +160,7 @@ def q_learning(env: SingleAgentEnv,
     return ans
 
 def expected_sarsa(env: SingleAgentEnv,
-               gamma: float = 0.9999,
+               gamma: float = 0.99999,
                alpha: float = 0.1,
                epsilon: float = 0.2,
                max_episodes_count: int = 100000):
@@ -213,6 +216,7 @@ def expected_sarsa(env: SingleAgentEnv,
         lenght_episodes.append(lenght_episode)
         reward_episodes.append(G)
 
+    print(len(pi))
     # save logs
     dict_logs = {
         "lenght_episodes": lenght_episodes,
@@ -226,7 +230,7 @@ def expected_sarsa(env: SingleAgentEnv,
 
 def save_policy(play_first):
     # pi, Q = q_learning_on_tic_tac_toe_solo(play_first)
-    pi, Q = sarsa_on_tic_tac_toe_solo(play_first)
+    pi, Q = expected_sarsa_on_tic_tac_toe_solo(play_first)
     # pi, Q = expected_sarsa_on_tic_tac_toe_solo(play_first)
     with open(os.path.join(os.path.dirname(__file__), '../tictactoe_interface', 'policy',
                            'policy_play_first_' + str(play_first) + '.json'), 'w') as file:
@@ -252,8 +256,9 @@ def q_learning_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
     # TODO
+    # étrange, marche seulement si j'augmente la reward d'un facteur 10 r*10
     env = TicTacToeEnv(play_first)
-    return q_learning(env)
+    return q_learning(env, alpha=0.3, epsilon=0.05, max_episodes_count=100000)
 
 
 def expected_sarsa_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
@@ -265,7 +270,7 @@ def expected_sarsa_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFuncti
     """
     # TODO
     env = TicTacToeEnv(play_first)
-    return expected_sarsa(env)
+    return expected_sarsa(env, alpha=0.2, epsilon=0.02, max_episodes_count=200000)
 
 
 def sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
@@ -277,7 +282,7 @@ def sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
     """
     env = Env3()
     # TODO
-    return sarsa(env)
+    return sarsa(env, alpha=0.1, epsilon=0.1, max_episodes_count=50000)
 
 
 def q_learning_on_secret_env3() -> PolicyAndActionValueFunction:
@@ -289,7 +294,7 @@ def q_learning_on_secret_env3() -> PolicyAndActionValueFunction:
     """
     env = Env3()
     # TODO
-    return q_learning(env)
+    return q_learning(env, alpha=0.05, epsilon=0.2, max_episodes_count=100000)
 
 
 def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
@@ -301,17 +306,17 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
     """
     env = Env3()
     # TODO
-    return expected_sarsa(env)
+    return expected_sarsa(env, alpha=0.1, epsilon=0.02, max_episodes_count=50000)
 
 
 def demo():
     pass
-    print(sarsa_on_tic_tac_toe_solo(True))
+    # print(sarsa_on_tic_tac_toe_solo(True))
     # print(q_learning_on_tic_tac_toe_solo(True))
     # print(expected_sarsa_on_tic_tac_toe_solo(True))
     #
     # print(sarsa_on_secret_env3())
     # print(q_learning_on_secret_env3())
-    # print(expected_sarsa_on_secret_env3())
+    print(expected_sarsa_on_secret_env3())
 
-    save_policy(False)
+    # save_policy(True)
