@@ -1,12 +1,14 @@
 import numpy as np
 import json
 import os
-import copy
+from tqdm import tqdm
 
 from ..do_not_touch.contracts import SingleAgentEnv
 from ..do_not_touch.result_structures import PolicyAndActionValueFunction, Policy, ActionValueFunction
-from ..do_not_touch.single_agent_env_wrapper import Env2, Env3
+from ..do_not_touch.single_agent_env_wrapper import Env2
 from ..custom_monte_carlo_env.TicTacToeEnv import TicTacToeEnv
+from ..custom_monte_carlo_env.LineWorldEnv import LineWorldEnv
+from ..custom_monte_carlo_env.GridWorldEnv import GridWorldEnv
 
 path_save_logs = "logs/"
 
@@ -24,7 +26,7 @@ def argmax(dict):
 
 def monte_carlo_es(env: SingleAgentEnv,
                    gamma: float = 0.99999,
-                   max_episodes_count: int = 10000):
+                   max_episodes_count: int = 50000):
     # used for logs
     lenght_episodes = []
     reward_episodes = []
@@ -32,13 +34,28 @@ def monte_carlo_es(env: SingleAgentEnv,
     pi: Policy = {}
     Q: ActionValueFunction = {}
     Returns = {}
-    for ep_id in range(max_episodes_count):
-        lenght_episode = 0
+    for ep_id in tqdm(range(max_episodes_count)):
+        lenght_episode = 1
 
         S = []
         A = []
         R = []
         env.reset_random()
+        s = env.state_id()
+        aa = env.available_actions_ids()
+        # initialize pi[s], Q[s] and Returns[s] if s is new
+        if s not in pi.keys():
+            pi[s] = {a: 1 / len(aa) for a in aa}
+            Q[s] = {a: np.random.uniform(-1.0, 1.0) for a in aa}
+            Returns[s] = {a: [] for a in aa}
+        a = np.random.choice(aa)
+        old_score = env.score()
+        env.act_with_action_id(a)
+        new_score = env.score()
+        r = new_score - old_score
+        S.append(s)
+        A.append(a)
+        R.append(r)
         while not env.is_game_over():
             s = env.state_id()
             aa = env.available_actions_ids()
@@ -70,6 +87,7 @@ def monte_carlo_es(env: SingleAgentEnv,
 
             G = r_t + gamma * G
             if (s_t, a_t) not in zip(S[0: t], A[0: t]):
+            # if (s_t, a_t) not in zip(S[t+1:], A[t+1:]):
                 Returns[s_t][a_t].append(G)
                 Q[s_t][a_t] = np.mean(Returns[s_t][a_t])
                 best_a = argmax(Q[s_t])
@@ -93,7 +111,7 @@ def monte_carlo_es(env: SingleAgentEnv,
 def on_policy_first_visit_monte_carlo_control(env: SingleAgentEnv,
                                               gamma: float = 0.99999,
                                               epsilon: float = 0.2,
-                                              max_episodes_count: int = 50000):
+                                              max_episodes_count: int = 10000):
     # used for logs
     lenght_episodes = []
     reward_episodes = []
@@ -102,7 +120,7 @@ def on_policy_first_visit_monte_carlo_control(env: SingleAgentEnv,
     pi: Policy = {}
     Q: ActionValueFunction = {}
     Returns = {}
-    for ep_id in range(max_episodes_count):
+    for ep_id in tqdm(range(max_episodes_count)):
         lenght_episode = 0
 
         S = []
@@ -172,7 +190,7 @@ def off_policy_monte_carlo_control(env: SingleAgentEnv,
     pi: Policy = {}
     Q: ActionValueFunction = {}
     C = {}
-    for ep_id in range(max_episodes_count):
+    for ep_id in tqdm(range(max_episodes_count)):
         # Launch episode with pi to calcul metrics mean reward and mean lenght
         lenght_episode = 0
         G_reward = 0
@@ -271,6 +289,29 @@ def save_policy(play_first):
                            'policy_play_first_' + str(play_first) + '.json'), 'w') as file:
         json.dump(pi, file)
 
+
+
+def monte_carlo_es_on_line_world() -> PolicyAndActionValueFunction:
+    env = LineWorldEnv(7)
+    return monte_carlo_es(env)
+
+def on_policy_first_visit_monte_carlo_control_on_line_world() -> PolicyAndActionValueFunction:
+    env = LineWorldEnv(7)
+    return on_policy_first_visit_monte_carlo_control(env)
+
+def off_policy_monte_carlo_control_on_line_world() -> PolicyAndActionValueFunction:
+    # env1 = LineWorldEnv(7)
+    # env2 = LineWorldEnv(7)
+    return "ne fonctionne pas dû à l'initialisation de la policy qui fait faire des aller retour à l'agent et donc on a une boucle infinie"
+
+def monte_carlo_es_on_grid_world() -> PolicyAndActionValueFunction:
+    env = GridWorldEnv()
+    return monte_carlo_es(env)
+
+def on_policy_first_visit_monte_carlo_control_on_grid_world() -> PolicyAndActionValueFunction:
+    env = GridWorldEnv()
+    return on_policy_first_visit_monte_carlo_control(env)
+
 def monte_carlo_es_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
     """
     Creates a TicTacToe Solo environment (Single player versus Uniform Random Opponent)
@@ -347,8 +388,15 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
+    # print(monte_carlo_es_on_line_world())
+    # print(on_policy_first_visit_monte_carlo_control_on_line_world())
+    # print(off_policy_monte_carlo_control_on_line_world())
+    #
+    # print(monte_carlo_es_on_grid_world())
+    # print(on_policy_first_visit_monte_carlo_control_on_grid_world())
+    # print(off_policy_monte_carlo_control_on_grid_world())
 
-    # print(monte_carlo_es_on_tic_tac_toe_solo(True))
+    print(monte_carlo_es_on_tic_tac_toe_solo(True))
     # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo(True))
     # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo(True))
     #
@@ -356,4 +404,4 @@ def demo():
     # print(on_policy_first_visit_monte_carlo_control_on_secret_env2())
     # print(off_policy_monte_carlo_control_on_secret_env2())
 
-    save_policy(True)
+    # save_policy(True)

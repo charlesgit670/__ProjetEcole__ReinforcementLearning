@@ -28,8 +28,8 @@ class LineWorldEnv(SingleAgentEnv):
           return 1.0
         return 0.0
 
-    def available_actions_ids(self) -> np.ndarray:
-        return np.array([0, 1]) if not self.is_game_over() else np.array([])  # Left, Right
+    def available_actions_ids(self) -> list:
+        return [0, 1] if not self.is_game_over() else []  # Left, Right
 
     def reset(self):
         self.agent_pos = self.cells_count // 2
@@ -40,6 +40,6 @@ class LineWorldEnv(SingleAgentEnv):
         print()
 
     def reset_random(self):
-        self.agent_pos = np.random.randint(1, self.cells_count)
+        self.agent_pos = np.random.randint(1, self.cells_count - 2)
 
 
