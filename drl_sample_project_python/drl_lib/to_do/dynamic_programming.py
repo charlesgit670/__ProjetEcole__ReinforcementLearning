@@ -2,6 +2,7 @@ import numpy as np
 import random
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pprint
 
 from ..do_not_touch.mdp_env_wrapper import Env1
 from ..do_not_touch.result_structures import ValueFunction, Policy, PolicyAndValueFunction
@@ -132,7 +133,7 @@ def value_iteration(S, A, R, p):
 
 def plot_grid_world(pi, V):
     matrix = [[1 if V.get((x, y)) == 0 else V.get((x, y)) for y in range(5)] for x in range(5)]
-    directions = {key: max(value, key=value.get) for key, value in pi.items()}
+
 
     fig, ax = plt.subplots()
     sns.heatmap(matrix, cmap='coolwarm', cbar=True, ax=ax)
@@ -140,25 +141,27 @@ def plot_grid_world(pi, V):
     ax.set_xlim(0, 5)
     ax.set_ylim(5, 0)
 
-    # Parcours de la grille et des directions pour tracer les flèches
-    for (x, y), direction in directions.items():
-        dx, dy = 0, 0
-        if direction == 0:
-            dx = -0.4
-        elif direction == 1:
-            dx = 0.4
-        elif direction == 2:
-            dy = 0.4
-        elif direction == 3:
-            dy = -0.4
-        ax.arrow(y + 0.5, x + 0.5, dx, dy, head_width=0.1, head_length=0.1, fc='black')
+    if pi is not None:
+        directions = {key: max(value, key=value.get) for key, value in pi.items() if len(value) > 0}
+        # Parcours de la grille et des directions pour tracer les flèches
+        for (x, y), direction in directions.items():
+            dx, dy = 0, 0
+            if direction == 0:
+                dx = -0.4
+            elif direction == 1:
+                dx = 0.4
+            elif direction == 2:
+                dy = 0.4
+            elif direction == 3:
+                dy = -0.4
+            ax.arrow(y + 0.5, x + 0.5, dx, dy, head_width=0.1, head_length=0.1, fc='black')
     plt.show()
 
 def plot_line_world(pi, V):
     matrix = [[1 if V.get(y) == 0 else V.get(y) for y in range(len(V))] for x in range(1)]
     directions = {key: max(value, key=value.get) for key, value in pi.items()}
 
-    fig, ax = plt.subplots(figsize=(8, 1))
+    fig, ax = plt.subplots(figsize=(8, 2))
     sns.heatmap(matrix, cmap='coolwarm', cbar=True, ax=ax)
 
     ax.set_xlim(0, len(V))
@@ -201,7 +204,9 @@ def policy_iteration_on_line_world() -> PolicyAndValueFunction:
     Returns the Policy (Pi(s,a)) and its Value Function (V(s))
     """
     S, A, R = env_line_world()
-    return policy_iteration(S, A, R, p_line_world)
+    pi, V = policy_iteration(S, A, R, p_line_world)
+    plot_line_world(pi, V)
+    return pi, V
 
 
 def value_iteration_on_line_world() -> PolicyAndValueFunction:
@@ -224,7 +229,9 @@ def policy_evaluation_on_grid_world() -> ValueFunction:
     Returns the Value function (V(s)) of this policy
     """
     S, A, R = env_grid_world()
-    return policy_evaluation(S, A, R , p_grid_world, pi_random_grid_world)
+    V = policy_evaluation(S, A, R, p_grid_world, pi_random_grid_world)
+    plot_grid_world(None, V)
+    return V
 
 
 def policy_iteration_on_grid_world() -> PolicyAndValueFunction:
@@ -234,7 +241,9 @@ def policy_iteration_on_grid_world() -> PolicyAndValueFunction:
     Returns the Policy (Pi(s,a)) and its Value Function (V(s))
     """
     S, A, R = env_grid_world()
-    return policy_iteration(S, A, R, p_grid_world)
+    pi, V = policy_iteration(S, A, R, p_grid_world)
+    plot_grid_world(pi, V)
+    return pi, V
 
 
 
@@ -311,7 +320,7 @@ def demo():
     #
     # print(policy_evaluation_on_grid_world())
     # print(policy_iteration_on_grid_world())
-    # print(value_iteration_on_grid_world())
+    print(value_iteration_on_grid_world())
     #
     # print(policy_evaluation_on_secret_env1())
     # print(policy_iteration_on_secret_env1())
