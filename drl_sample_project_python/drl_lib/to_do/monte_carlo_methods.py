@@ -397,7 +397,7 @@ def on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo(play_first) ->
     """
     # TODO
     env = TicTacToeEnv(play_first)
-    return on_policy_first_visit_monte_carlo_control(env, epsilon=0.1, max_episodes_count=100000)
+    return on_policy_first_visit_monte_carlo_control(env, epsilon=0.1, max_episodes_count=300000)
 
 
 def off_policy_monte_carlo_control_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
@@ -469,8 +469,8 @@ def demo():
     # print(off_policy_monte_carlo_control_on_grid_world())
 
     # print(monte_carlo_es_on_tic_tac_toe_solo(True))
-    # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo(True))
-    print(off_policy_monte_carlo_control_on_tic_tac_toe_solo(True))
+    print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo(True))
+    # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo(True))
     #
     # print(random_evaluation_on_secret_env2_with_reset_random())
     # print(random_evaluation_on_secret_env2())

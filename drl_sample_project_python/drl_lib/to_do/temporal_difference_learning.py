@@ -292,7 +292,7 @@ def sarsa_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
     """
     # TODO
     env = TicTacToeEnv(play_first)
-    return sarsa(env, alpha=0.3, epsilon=0.1, max_episodes_count=200000)
+    return sarsa(env, alpha=0.3, epsilon=0.1, max_episodes_count=300000)
 
 
 def q_learning_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
@@ -304,7 +304,7 @@ def q_learning_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
     """
     # TODO
     env = TicTacToeEnv(play_first)
-    return q_learning(env, alpha=0.3, epsilon=0.05, max_episodes_count=1000000)
+    return q_learning(env, alpha=0.3, epsilon=0.05, max_episodes_count=300000)
 
 
 def expected_sarsa_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFunction:
@@ -316,7 +316,7 @@ def expected_sarsa_on_tic_tac_toe_solo(play_first) -> PolicyAndActionValueFuncti
     """
     # TODO
     env = TicTacToeEnv(play_first)
-    return expected_sarsa(env, alpha=0.2, epsilon=0.05, max_episodes_count=1000000)
+    return expected_sarsa(env, alpha=0.2, epsilon=0.05, max_episodes_count=300000)
 
 
 def random_evaluation_on_env3() -> PolicyAndActionValueFunction:
@@ -370,13 +370,13 @@ def demo():
     # print(q_learning_on_grid_world())
     # print(expected_sarsa_on_grid_world())
     #
-    # print(sarsa_on_tic_tac_toe_solo(True))
-    # print(q_learning_on_tic_tac_toe_solo(True))
+    print(sarsa_on_tic_tac_toe_solo(True))
+    print(q_learning_on_tic_tac_toe_solo(True))
     # print(expected_sarsa_on_tic_tac_toe_solo(True))
     #
     # print(random_evaluation_on_env3())
     # print(sarsa_on_secret_env3())
-    print(q_learning_on_secret_env3())
+    # print(q_learning_on_secret_env3())
     # print(expected_sarsa_on_secret_env3())
 
     # save_policy(True)

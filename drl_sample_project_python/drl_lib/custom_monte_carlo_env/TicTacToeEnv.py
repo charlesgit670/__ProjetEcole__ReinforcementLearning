@@ -46,11 +46,11 @@ class TicTacToeEnv(SingleAgentEnv):
                 return 1 if ((self.states[i] == 1 and self.play_first) or \
                             (self.states[i] == 2 and not self.play_first)) else -1
         if self.states[0] == self.states[4] == self.states[8] != 0:
-            return 1 if ((self.states[i] == 1 and self.play_first) or \
-                        (self.states[i] == 2 and not self.play_first)) else -1
+            return 1 if ((self.states[0] == 1 and self.play_first) or \
+                        (self.states[0] == 2 and not self.play_first)) else -1
         if self.states[2] == self.states[4] == self.states[6] != 0:
-            return 1 if ((self.states[i] == 1 and self.play_first) or \
-                        (self.states[i] == 2 and not self.play_first)) else -1
+            return 1 if ((self.states[2] == 1 and self.play_first) or \
+                        (self.states[2] == 2 and not self.play_first)) else -1
         return 0
 
     def available_actions_ids(self) -> list:
