@@ -2,7 +2,7 @@
 
 ## Introduction
 
-L'objectif de ce projet est d'implémenter "from scratch" différents algorithmes d'apprentissage par renforcement sur divers environnements de difficulté croissante, tels que *Line World*, *Grid World* et *Tic-Tac-Toe*.
+L'objectif de ce projet de groupe est d'implémenter "from scratch" différents algorithmes d'apprentissage par renforcement sur divers environnements de difficulté croissante, tels que *Line World*, *Grid World* et *Tic-Tac-Toe*.
 
 Ce projet permet d'améliorer la compréhension de ces algorithmes et de comparer leurs performances. On distingue trois grandes catégories d'algorithmes :
 
